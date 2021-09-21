@@ -6,9 +6,6 @@
 //	additional informations.
 //---------------------------------------------------------------------------
 
-//
-// This is the main program entry point
-//
 #include <stdio.h>
 
 #include "types.h"
@@ -88,8 +85,6 @@ int		m_bIsActive;
 EMUINFO		m_emuInfo;
 SYSTEMINFO	m_sysInfo[NR_OF_SYSTEMS];
 
-#define ARRAY_SIZE(a)		(sizeof(a)/sizeof(*(a)))
-
 void mainemuinit(void)
 {
    sprite_table           = get_address(0x00008800);
@@ -146,28 +141,24 @@ void mainemuinit(void)
    z80Init();
 #endif
 
-   // if neogeo pocket color rom, act if we are a neogeo pocket color
+   /* If NeoGeo Pocket Color ROM, act if we are a NeoGeo Pocket Color */
    tlcsMemWriteB(0x6F91,tlcsMemReadB(0x00200023));
    if (tipo_consola==1)
       tlcsMemWriteB(0x6F91,0x00);
 
-   // pretend we're running in English mode
+   /* Pretend we're running in English mode */
 
-   //NOTA setting_ngp_language 00 Ingles - 01 Jap
+   /* NOTA setting_ngp_language 00 Ingles - 01 Jap */
    if (setting_ngp_language == 0)
-   {
       tlcsMemWriteB(0x00006F87,0x01);
-   }
    if (setting_ngp_language == 1)
-   {
       tlcsMemWriteB(0x00006F87,0x00);
-   }
 
-   // kludges & fixes
+   /* kludges & fixes */
    switch (tlcsMemReadW(0x00200020))
    {
-      case 0x0059:	// Sonic
-      case 0x0061:	// Metal Slug 2nd
+      case 0x0059:	/* Sonic          */
+      case 0x0061:	/* Metal Slug 2nd */
          *get_address(0x0020001F) = 0xFF;
          break;
    }
@@ -196,22 +187,12 @@ static int initRom(void)
    if (mainrom[0x000020] == 0x65 || mainrom[0x000020] == 0x93)
       finscan=199;
 
-#if 0
-   dbg_print("in openNgp(%s)\n", lpszPathName);
-#endif
-
-   // first stop the current emulation
-#if 0
-   dbg_print("openNgp: SetEmu(NONE)\n");
-#endif
+   /* first stop the current emulation */
    SetEmu(NGPC);
-#if 0
-   dbg_print("openNgp: SetActive(FALSE)\n");
-#endif
    SetActive(FALSE);
 
-   // check NEOGEO POCKET
-   // check license info
+   /* check NEOGEO POCKET
+    * check license info */
    for (i=0;i<19;i++)
    {
       if (mainrom[0x000009 + i] != licenseInfo[i])
@@ -219,7 +200,6 @@ static int initRom(void)
    }
    if (romFound)
    {
-      //dbg_print("openNgp: romFound == TRUE\n");
       i = mainrom[0x000023];
       if (i == 0x10 || i == 0x00)
       {
@@ -237,17 +217,12 @@ static int initRom(void)
          if (tipo_consola==1)
             m = NGP;
 
-         //dbg_print("openNgp: SetEmu(%d)\n", m);
          SetEmu(m);
 
-         //dbg_print("openNgp: Calling mainemuinit(%s)\n", lpszPathName);
          mainemuinit();
          // start running the emulation loop
-         //dbg_print("openNgp: SetActive(TRUE)\n");
          SetActive(TRUE);
 
-         // acknowledge opening of the document went fine
-         //dbg_print("openNgp: returning success\n");
          return TRUE;
       }
 
@@ -261,10 +236,10 @@ static int initRom(void)
 
 static void initSysInfo(void)
 {
-	m_bIsActive = FALSE;
+	m_bIsActive       = FALSE;
 
 	m_emuInfo.machine = NGPC;
-	m_emuInfo.drv = &m_sysInfo[m_emuInfo.machine];
+	m_emuInfo.drv     = &m_sysInfo[m_emuInfo.machine];
 	m_emuInfo.romSize = 0;
 
 	strcpy(m_emuInfo.RomFileName, "");
@@ -278,24 +253,10 @@ static void initSysInfo(void)
 	m_sysInfo[NGPC].Ticks = 6*1024*1024;
 }
 
-static int strrchr2(const char *src, int c)
-{
-  size_t len=strlen(src);
-
-  while(len>0)
-  {
-    len--;
-    if(*(src+len) == c)
-      return len;
-  }
-
-  return 0;
-}
-
 int handleInputFile(const char *romName,
 		const unsigned char *romData, int romSize)
 {
-	initSysInfo();  //initialize it all
+	initSysInfo();  /* initialize it all */
 
 	if (romData)
 	{
@@ -308,11 +269,9 @@ int handleInputFile(const char *romName,
 	}
 	else
 	{
-		RFILE *romFile = NULL;
 		int64_t size   = 0;
-
-		//get ROM from binary ROM file
-		romFile = filestream_open(romName,
+		/* get ROM from binary ROM file */
+		RFILE *romFile = filestream_open(romName,
 				RETRO_VFS_FILE_ACCESS_READ,
 				RETRO_VFS_FILE_ACCESS_HINT_NONE);
 		if(!romFile)

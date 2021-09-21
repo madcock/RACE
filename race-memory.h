@@ -40,30 +40,12 @@ extern "C" {
 extern unsigned char mainram[];			/* All RAM areas */
 extern unsigned char mainrom[];			/* ROM image area */
 extern unsigned char cpurom[];			/* Bios ROM image area */
-#if 0
-extern unsigned int cartAddrMask;		/* Mask for reading/writing mainrom */
-#endif
 
-/* tlcs 900h memory */
-#if 0
-extern unsigned char	cpuram[];		/* 900h cpu core needs this.. */
-#endif
+/* TLCS 900h memory */
 extern unsigned char *cpuram;
 void mem_init(void);
 
-#if 0
-unsigned char *get_address(unsigned int addr);
-unsigned char *get_addressW(unsigned int addr);
-#endif
-
-/* gameboy memory */
-
-extern unsigned char (*gbMemReadB)(unsigned short addr);
-extern void (*gbMemWriteB)(unsigned short addr, unsigned char data);
-unsigned short gbMemReadW(unsigned short addr);
-void gbMemWriteW(unsigned short addr, unsigned short data);
-
-/* z80 memory functions */
+/* Z80 memory functions */
 
 extern unsigned char (*z80MemReadB)(unsigned short addr);
 extern unsigned short (*z80MemReadW)(unsigned short addr);
@@ -81,84 +63,6 @@ void DrZ80ngpPortWriteB(unsigned short port, unsigned char data);
 unsigned char DrZ80ngpPortReadB(unsigned short port);
 #endif
 
-/* used internally by z80 emulation for emulation of the memory
- * map of the Game Gear */
-extern unsigned char	*ggVRAM;
-extern unsigned char	*ggCRAM;
-
-unsigned char z80ggMemReadB(unsigned short addr);
-unsigned short z80ggMemReadW(unsigned short addr);
-void z80ggMemWriteB(unsigned short addr, unsigned char data);
-void z80ggMemWriteW(unsigned short addr, unsigned short data);
-void z80ggPortWriteB(unsigned char port, unsigned char data);
-unsigned char z80ggPortReadB(unsigned char port);
-
-/* definitions for wdc6502 emulation */
-extern unsigned char (*w65MemReadB)(unsigned short addr);
-#if 0
-extern unsigned short (*w65MemReadW)(unsigned short addr);
-extern void (*w65MemWriteW)(unsigned short addr, unsigned short data);
-#endif
-unsigned short w65MemReadW(unsigned short addr);
-extern void (*w65MemWriteB)(unsigned short addr, unsigned char data);
-void w65MemWriteW(unsigned short addr, unsigned short data);
-extern unsigned char *w65GetAddress(unsigned short addr);
-
-//
-// Supervision specific
-//
-extern unsigned char	*svVRAM;
-
-//
-// HuC specific defines & externs
-//
-
-extern unsigned char	hucMMR[8];
-
-/*
- * i8086 functions
- */
-
-extern unsigned char	*x86Ports;
-
-unsigned char x86MemReadB(unsigned int addr);
-void x86MemWriteB(unsigned int addr, unsigned char data);
-unsigned short x86MemReadW(unsigned int addr);
-void x86MemWriteW(unsigned int addr, unsigned short data);
-unsigned char x86PortReadB(unsigned short port);
-void x86PortWriteB(unsigned short port, unsigned char data);
-unsigned short x86PortReadW(unsigned short port);
-void x86PortWriteW(unsigned short port, unsigned short data);
-
-/* used for Wonderswan graphics emulation */
-
-extern unsigned char	*wsTileMap0;
-extern unsigned char	*wsTileMap1;
-extern unsigned char	*wsPatterns;
-extern unsigned char	*wsSpriteTable;
-
-/*
- * i8048 functions
- */
-
-extern unsigned char	*advBios;
-extern unsigned char	*advVidRAM;
-
-unsigned char i8048ROMReadB(unsigned int addr);
-unsigned char i8048ExtReadB(unsigned int addr);
-void i8048ExtWriteB(unsigned int addr, unsigned char data);
-unsigned char i8048PortReadB(unsigned char port);
-void i8048PortWriteB(unsigned char port, unsigned char data);
-void i8048SetT1(void);
-unsigned char i8048GetT1(void);
-
-/*
- * sm85xx memory functions
- */
-
-extern unsigned char (*sm85MemReadB)(unsigned short addr);
-extern void (*sm85MemWriteB)(unsigned short addr, unsigned char data);
-
 extern unsigned char realBIOSloaded;
 
 static INLINE unsigned char *get_address(unsigned int addr)
@@ -167,20 +71,9 @@ static INLINE unsigned char *get_address(unsigned int addr)
    if (addr<0x00200000)
    {
       if (addr<0x000008a0)
-      {
-#if 0
-         if(((unsigned int)&cpuram[addr] >> 24) == 0xFF)
-            dbg_print("1) addr=0x%X returning=0x%X\n", addr, &cpuram[addr]);
-#endif
          return &cpuram[addr];
-      }
       if (addr>0x00003fff && addr<0x00018000)
       {
-#if 0
-         if((unsigned int)&mainram[addr-0x00004000] >> 24 == 0xFF)
-            dbg_print("2) addr=0x%X returning=0x%X\n", addr, &mainram[addr-0x00004000]);
-#endif
-
          switch (addr)  /* Thanks Koyote */
          {
             case 0x6F80:
@@ -205,33 +98,16 @@ static INLINE unsigned char *get_address(unsigned int addr)
    else
    {
       if (addr<0x00400000)
-      {
          return &mainrom[(addr-0x00200000) /*&cartAddrMask*/];
-      }
       if(addr<0x00800000) /* Flavor added */
-      {
          return 0;
-      }
       if (addr<0x00A00000)
-      {
          return &mainrom[(addr-(0x00800000-0x00200000))/*&cartAddrMask*/];
-      }
       if(addr<0x00FF0000) /* Flavor added */
-      {
          return 0;
-      }
-
-#if 0
-      if((unsigned int)&cpurom[addr-0x00ff0000] >> 24 == 0xFF)
-         dbg_print("5) addr=0x%X returning=0x%X\n", addr, &cpurom[addr-0x00ff0000]);
-#endif
 
       return &cpurom[addr-0x00ff0000];
    }
-
-#if 0
-   dbg_print("6) addr=0x%X returning=0\n", addr);
-#endif
    return 0;  /* Flavor ERROR */
 }
 
@@ -243,41 +119,34 @@ static INLINE unsigned char tlcsMemReadB(unsigned int addr)
 	if(currentCommand == COMMAND_INFO_READ)
         return flashReadInfo(addr);
 
-	if (addr < 0x00200000) {
-		if (addr < 0x000008A0) {
-			if(addr == 0xBC)
-			{
-				ngpSoundExecute();
-			}
-			return cpuram[addr];
-		}
-		else if (addr > 0x00003FFF && addr < 0x00018000)
-        {
-
-            switch (addr)  /* Thanks Koyote */
-            {
-                case 0x6DA2:
-                    return 0x80;
-                    break;
-                case 0x6F80:
-                    return 0xFF;
-                    break;
-                case 0x6F80+1:
-                    return 0x03;
-                    break;
-                case 0x6F85:
-                    return 0x00;
-                    break;
-                case 0x6F82:
-                    return ngpInputState;
-                    break;
-
-                default:
-                    return mainram[addr-0x00004000];
-            }
-            return mainram[addr-0x00004000];
-        }
-	}
+	if (addr < 0x00200000)
+   {
+      if (addr < 0x000008A0)
+      {
+         if(addr == 0xBC)
+            ngpSoundExecute();
+         return cpuram[addr];
+      }
+      else if (addr > 0x00003FFF && addr < 0x00018000)
+      {
+         switch (addr)  /* Thanks Koyote */
+         {
+            case 0x6DA2:
+               return 0x80;
+            case 0x6F80:
+               return 0xFF;
+            case 0x6F80+1:
+               return 0x03;
+            case 0x6F85:
+               return 0x00;
+            case 0x6F82:
+               return ngpInputState;
+            default:
+               break;
+         }
+         return mainram[addr-0x00004000];
+      }
+   }
 	else
 	{
 		if (addr<0x00400000)
@@ -297,36 +166,25 @@ static INLINE unsigned char tlcsMemReadB(unsigned int addr)
 static INLINE unsigned short tlcsMemReadW(unsigned int addr)
 {
 #ifdef TARGET_GP2X
-	register unsigned short i asm("r0");
-	register unsigned char *gA asm("r1");
+   register unsigned short i asm("r0");
+   register unsigned char *gA asm("r1");
 
-	gA = get_address(addr);
+   gA = get_address(addr);
 
-    if(gA == 0)
-        return 0;
+   if(gA == 0)
+      return 0;
 
-    asm volatile(
-    "ldrb	%0, [%1]\n\t"
-    "ldrb	r2, [%1, #1]\n\t"
-    "orr	%0, %0, r2, asl #8"
-    : "=r" (i)
-    : "r" (gA)
-    : "r2");
+   asm volatile(
+         "ldrb	%0, [%1]\n\t"
+         "ldrb	r2, [%1, #1]\n\t"
+         "orr	%0, %0, r2, asl #8"
+         : "=r" (i)
+         : "r" (gA)
+         : "r2");
 
-    return i;
+   return i;
 #else
-/*	unsigned short i;
-	unsigned char *gA = get_address(addr);
-
-    if(gA == 0)
-        return 0;
-
-    i = *(gA++);
-    i |= (*gA) << 8;
-
-	return i;
-	*/
-	return tlcsMemReadB(addr) | (tlcsMemReadB(addr+1) << 8);
+   return tlcsMemReadB(addr) | (tlcsMemReadB(addr+1) << 8);
 #endif
 }
 
@@ -334,83 +192,80 @@ static INLINE unsigned short tlcsMemReadW(unsigned int addr)
 static INLINE unsigned int tlcsMemReadL(unsigned int addr)
 {
 #ifdef TARGET_GP2X
-	register unsigned int i asm("r0");
-	register unsigned char *gA asm("r4");
+   register unsigned int i asm("r0");
+   register unsigned char *gA asm("r4");
 
-	gA = get_address(addr);
+   gA = get_address(addr);
 
-    if(gA == 0)
-        return 0;
+   if(gA == 0)
+      return 0;
 
-    asm volatile(
-    "bic	r1,%1,#3	\n"
-    "ldmia	r1,{r0,r3}	\n"
-    "ands	r1,%1,#3	\n"
-    "movne	r2,r1,lsl #3	\n"
-    "movne	r0,r0,lsr r2	\n"
-    "rsbne	r1,r2,#32	\n"
-    "orrne	r0,r0,r3,lsl r1"
-    : "=r"(i)
-    : "r"(gA)
-    : "r1","r2","r3");
+   asm volatile(
+         "bic	r1,%1,#3	\n"
+         "ldmia	r1,{r0,r3}	\n"
+         "ands	r1,%1,#3	\n"
+         "movne	r2,r1,lsl #3	\n"
+         "movne	r0,r0,lsr r2	\n"
+         "rsbne	r1,r2,#32	\n"
+         "orrne	r0,r0,r3,lsl r1"
+         : "=r"(i)
+         : "r"(gA)
+         : "r1","r2","r3");
 
-    return i;
+   return i;
 #else
-	unsigned int i;
-	unsigned char *gA = get_address(addr);
+   unsigned int i;
+   unsigned char *gA = get_address(addr);
 
-    if(gA == 0)
-        return 0;
+   if(gA == 0)
+      return 0;
 
-    i = *(gA++);
-    i |= (*(gA++)) << 8;
-    i |= (*(gA++)) << 16;
-    i |= (unsigned int)(*gA) << 24;
+   i = *(gA++);
+   i |= (*(gA++)) << 8;
+   i |= (*(gA++)) << 16;
+   i |= (unsigned int)(*gA) << 24;
 
-#if 0
-	return tlcsMemReadB(addr) | (tlcsMemReadB(addr +1) << 8) | (tlcsMemReadB(addr +2) << 16) | (tlcsMemReadB(addr +3) << 24);
-#else
-	return i;
-#endif
+   return i;
 #endif
 }
 
 /* write a byte (data) to a memory address (addr) */
 static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
 {
-	addr&= 0x00FFFFFF;
-    if (addr<0x000008a0)
-    {
-        switch(addr) {
+   addr&= 0x00FFFFFF;
+   if (addr<0x000008a0)
+   {
+      switch(addr)
+      {
 #if 0
-        case 0x80:	/* CPU speed */
+         case 0x80:	/* CPU speed */
             break;
 #endif
-        case 0xA0:	/* L CH Sound Source Control Register */
+         case 0xA0:	/* L CH Sound Source Control Register */
             if (cpuram[0xB8] == 0x55 && cpuram[0xB9] == 0xAA)
-                Write_SoundChipNoise(data);/*Flavor SN76496Write(0, data); */
+               Write_SoundChipNoise(data);/*Flavor SN76496Write(0, data); */
             break;
-        case 0xA1:	/* R CH Sound Source Control Register */
+         case 0xA1:	/* R CH Sound Source Control Register */
             if (cpuram[0xB8] == 0x55 && cpuram[0xB9] == 0xAA)
-                Write_SoundChipTone(data); /*Flavor SN76496Write(0, data); */
+               Write_SoundChipTone(data); /*Flavor SN76496Write(0, data); */
             break;
-        case 0xA2:	/* L CH DAC Control Register */
+         case 0xA2:	/* L CH DAC Control Register */
             ngpSoundExecute();
             if (cpuram[0xB8] == 0xAA)
-                dac_writeL(data); /*Flavor DAC_data_w(0,data); */
+               dac_writeL(data); /*Flavor DAC_data_w(0,data); */
             break;
 #if 0
-        case 0xA3:	/* R CH DAC Control Register */ /* Flavor hack for mono only sound */
+         case 0xA3:	/* R CH DAC Control Register */ /* Flavor hack for mono only sound */
             ngpSoundExecute();
             if (cpuram[0xB8] == 0xAA)
                dac_writeR(data); /* Flavor DAC_data_w(1,data); */
             break;
 #endif
-        case 0xB8:	/* Z80 Reset */
+         case 0xB8:	/* Z80 Reset */
 #if 0
-				if (data == 0x55)	DAC_data_w(0,0);
+            if (data == 0x55)	DAC_data_w(0,0);
 #endif
-        case 0xB9:	/* Sourd Source Reset Control Register */
+         case 0xB9:	/* Sourd Source Reset Control Register */
             switch(data)
             {
                case 0x55:
@@ -422,7 +277,7 @@ static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
                   break;
             }
             break;
-        case 0xBA:
+         case 0xBA:
             ngpSoundExecute();
 #if defined(DRZ80) || defined(CZ80)
             Z80_Cause_Interrupt(Z80_NMI_INT);
@@ -430,31 +285,31 @@ static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
             z80Interrupt(Z80NMI);
 #endif
             break;
-        }
-        cpuram[addr] = data;
-        return;
-    }
-    else if (addr>0x00003fff && addr<0x00018000)
-    {
-        if (addr == 0x87E2 && mainram[0x47F0] != 0xAA)
-            return;		/* disallow writes to GEMODE */
+      }
+      cpuram[addr] = data;
+      return;
+   }
+   else if (addr>0x00003fff && addr<0x00018000)
+   {
+      if (addr == 0x87E2 && mainram[0x47F0] != 0xAA)
+         return;		/* disallow writes to GEMODE */
 
 #if 0
-        if((addr >= 0x8800 && addr <= 0x88FF)
-              || (addr >= 0x8C00 && addr <= 0x8FFF)
-              || (addr >= 0xA000 && addr <= 0xBFFF)
-              || addr == 0x00008020
-              || addr == 0x00008021)
-           spritesDirty = true;
+      if((addr >= 0x8800 && addr <= 0x88FF)
+            || (addr >= 0x8C00 && addr <= 0x8FFF)
+            || (addr >= 0xA000 && addr <= 0xBFFF)
+            || addr == 0x00008020
+            || addr == 0x00008021)
+         spritesDirty = true;
 #endif
 
-        mainram[addr-0x00004000] = data;
-        return;
-    }
-    else if (addr>=0x00200000 && addr<0x00400000)
-        flashChipWrite(addr, data);
-    else if (addr>=0x00800000 && addr<0x00A00000)
-        flashChipWrite(addr, data);
+      mainram[addr-0x00004000] = data;
+      return;
+   }
+   else if (addr>=0x00200000 && addr<0x00400000)
+      flashChipWrite(addr, data);
+   else if (addr>=0x00800000 && addr<0x00A00000)
+      flashChipWrite(addr, data);
 }
 
 #ifdef __cplusplus

@@ -19,28 +19,10 @@
 extern "C" {
 #endif
 
-int initSound(void);
-void soundCleanup(void);
-
-void setHwnd(void);
-
-/* stolen MAME things */
-int osd_start_audio_stream(int stereo);
-void osd_stop_audio_stream(void);
-int osd_update_audio_stream(short *buffer);
-void osd_set_mastervolume(int _attenuation);
-int osd_get_mastervolume(void);
-
 /* General sound system functions */
 void soundStep(int cycles);
-void soundOutput(void);
 
 #define NUM_CHANNELS 32
-
-/* Gameboy sound system */
-void gbSoundInit(void);
-void gbSoundUpdate(void);
-void gbSoundWrite(int reg, unsigned char data);
 
 /* Neogeo pocket sound functions */
 void ngpSoundStart(void);
