@@ -34,14 +34,6 @@
 extern "C" {
 #endif
 
-typedef struct SYSTEMINFO
-{
-	int		hSize;
-	int		vSize;
-	int		Ticks;
-	int		InputKeys[12];
-} SYSTEMINFO;
-
 typedef struct EMUINFO
 {
 	char 	RomFileName[_MAX_PATH];
@@ -49,12 +41,10 @@ typedef struct EMUINFO
 	int		machine;		// what kind of machine should we emulate
 	int		romSize;		// what is the size of the currently loaded file
 	int		samples;
-	SYSTEMINFO	*drv;
 } EMUINFO;
 
 extern int		m_bIsActive;
 extern EMUINFO		m_emuInfo;
-extern SYSTEMINFO	m_sysInfo[NR_OF_SYSTEMS];
 extern int romSize;
 
 int handleInputFile(const char *romName,

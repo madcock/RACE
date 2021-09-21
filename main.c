@@ -83,7 +83,6 @@ unsigned char *rasterY       = NULL;
 
 int		m_bIsActive;
 EMUINFO		m_emuInfo;
-SYSTEMINFO	m_sysInfo[NR_OF_SYSTEMS];
 
 void mainemuinit(void)
 {
@@ -173,7 +172,6 @@ static void	SetActive(BOOL bActive)
 static void	SetEmu(int machine)
 {
 	m_emuInfo.machine = machine;
-	m_emuInfo.drv = &m_sysInfo[machine];
 }
 
 static int initRom(void)
@@ -239,18 +237,9 @@ static void initSysInfo(void)
 	m_bIsActive       = FALSE;
 
 	m_emuInfo.machine = NGPC;
-	m_emuInfo.drv     = &m_sysInfo[m_emuInfo.machine];
 	m_emuInfo.romSize = 0;
 
 	strcpy(m_emuInfo.RomFileName, "");
-
-	m_sysInfo[NGP].hSize = 160;
-	m_sysInfo[NGP].vSize = 152;
-	m_sysInfo[NGP].Ticks = 6*1024*1024;
-
-	m_sysInfo[NGPC].hSize = 160;
-	m_sysInfo[NGPC].vSize = 152;
-	m_sysInfo[NGPC].Ticks = 6*1024*1024;
 }
 
 int handleInputFile(const char *romName,

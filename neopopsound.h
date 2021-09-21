@@ -52,7 +52,6 @@ int sound_system_init(void);
 BOOL system_sound_init(void);
 void system_sound_chipreset(void);
 
-void system_sound_update(int nframes);
 void system_VBL(void);
 
 #define Write_SoundChipTone(VALUE)		(WriteSoundChip(&toneChip, VALUE))
@@ -60,13 +59,8 @@ void system_VBL(void);
 
 void sound_init(int SampleRate);
 
-extern BOOL mute;
-
 void dac_update(_u16* dac_buffer, int length_bytes);
 void sound_update(_u16* chip_buffer, int length_bytes);
-
-void increaseVolume(void);
-void decreaseVolume(void);
 
 void dac_writeL(unsigned char a);
 void dac_write(unsigned char a);

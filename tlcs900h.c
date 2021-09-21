@@ -213,10 +213,6 @@ unsigned char opcode;
 unsigned char lastbyte;
 //unsigned char opcode1, opcode2;
 
-
-// for debugging
-int  debugIndex, debugCount;
-
 // wrapper
 int  memoryCycles;
 
@@ -7819,10 +7815,6 @@ void tlcs_init(void)
             pendingInterrupts[i][j] = 0;
         }
     }
-
-    debugIndex = 0;
-    debugCount = 1;
-    //saved_my_pc = my_pc;
 }
 
 void tlcs_reinit(void)
@@ -7917,17 +7909,7 @@ void tlcs_reinit(void)
 
     set_cregs();
     my_pc = get_address(gen_regsPC);
-
-    debugIndex = 0;
-    debugCount = 1;
-    //saved_my_pc = my_pc;
 }
-
-/*int check_pc(unsigned int addr)
-{
- if (gen_regsPC==addr) return 1;
- else     return 0;
-}*/
 
 static void tlcsDMA(unsigned char vector);
 
@@ -8484,8 +8466,6 @@ void tlcs_execute(int cycles)
             }
             else if (*scanlineY == 152)
             {
-                system_sound_update(1);
-
                 // VBlank
                 if (tlcsMemReadB(0x8000)&0x80)
                     tlcs_interrupt(2);

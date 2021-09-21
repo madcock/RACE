@@ -322,49 +322,17 @@ void dac_writeL(unsigned char data)
       /* Write to buffer */
       dacBufferL[dacLBufferWrite++] = (data-0x80)<<8;
 
-#if 0
-      dacLBufferWrite++;
-#endif
       if (dacLBufferWrite == DAC_BUFFERSIZE)
          dacLBufferWrite = 0;
 
       /* Overflow? */
       dacLBufferCount++;
       if (dacLBufferCount == DAC_BUFFERSIZE)
-      {
-#if 0
-         dbg_printf("dac_write: DAC buffer overflow\nPlease report this to the author.");
-#endif
          dacLBufferCount = 0;
-      }
    }
 
 }
  
-#if 0
-void dac_writeR(unsigned char data)
-{
-	/* Write to buffer */
-	dacBufferR[dacRBufferWrite] = data;
-	dacRBufferWrite++;
-	if (dacRBufferWrite == DAC_BUFFERSIZE)
-		dacRBufferWrite = 0;
-
-	/* Overflow? */
-	dacRBufferCount++;
-	if (dacRBufferCount == DAC_BUFFERSIZE)
-	{
-		dbg_printf("dac_write: DAC buffer overflow\nPlease report this to the author.");
-		dacRBufferCount = 0;
-	}
-}
-#endif
-
-void dac_mixer(_u16* stream, int length_bytes)
-{
-}
-
-
 void dac_update(_u16* dac_buffer, int length_bytes)
 {
 	while (length_bytes > 1)
@@ -380,9 +348,6 @@ void dac_update(_u16* dac_buffer, int length_bytes)
 			dacLBufferCount--;
 
 			/* Advance the DAC read */
-#if 0
-			dacLBufferRead++;
-#endif
 			if (++dacLBufferRead == DAC_BUFFERSIZE)
 				dacLBufferRead = 0;
 		}
@@ -444,43 +409,20 @@ void sound_init(int SampleRate)
 		dacBufferL[i] = 0;
 
 	dacLBufferCount = 0;
-	dacLBufferRead = 0;
+	dacLBufferRead  = 0;
 	dacLBufferWrite = 0;
 }
 
 /* ============================================================================= */
 
-#define NGPC_CHIP_FREQUENCY		44100
-int chip_freq=NGPC_CHIP_FREQUENCY; /* what we'd prefer */
-
-#define CHIPBUFFERLENGTH	35280
-
-#define UNDEFINED		0xFFFFFF
-
-/* ====== Chip sound ========= */
-static int lastChipWrite = 0, chipWrite = UNDEFINED;	/* Write Cursor */
-
-/* ====== DAC sound ========= */
-static int lastDacWrite = 0, dacWrite = UNDEFINED;		/* Write Cursor */
-
-_u8 blockSound[CHIPBUFFERLENGTH], blockDAC[CHIPBUFFERLENGTH];		/* Gets filled with sound data. */
-unsigned int blockSoundWritePtr = 0;
-unsigned int blockSoundReadPtr = 0;
-
 void system_sound_chipreset(void)
 {
-	/* Initialises sound chips, matching frequencies */
-	sound_init(chip_freq);
+   /* Initialises sound chips, matching frequencies */
+   sound_init(44100);
 }
 
 int sound_system_init(void)
 {
    system_sound_chipreset();	/* Resets chips */
    return 1;
-}
-
-
-/* call this every so often to update the sound output */
-void system_sound_update(int nframes)
-{
 }
