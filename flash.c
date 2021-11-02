@@ -13,7 +13,6 @@
  * for emulation of NGPC carts
  */
 
-#include <stdio.h>
 #include <string.h>
 #include <streams/file_stream.h>
 #ifdef _WIN32
@@ -330,9 +329,6 @@ void writeSaveGameFile(void)
    }
 
    filestream_close(ngfFile);
-   /*	char msg[50];
-      sprintf(msg, "Saved File %s", ngfFilename);
-      printTTF(msg, 0, 100, yellow, 1, actualScreen, 1);*/
    needToWriteFile = 0;
 #ifdef TARGET_GP2X
    sync();

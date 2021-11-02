@@ -1,7 +1,6 @@
 #include "libretro.h"
 #include "libretro_core_options.h"
 #include "log.h"
-#include <stdio.h>
 #include <string.h>
 #include <streams/file_stream.h>
 

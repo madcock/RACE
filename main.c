@@ -6,8 +6,6 @@
 //	additional informations.
 //---------------------------------------------------------------------------
 
-#include <stdio.h>
-
 #include "types.h"
 #include "main.h"
 

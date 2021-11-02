@@ -1,6 +1,5 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "race-memory.h"
 #include "cz80.h"

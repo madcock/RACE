@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -18,20 +17,12 @@ void init_log(retro_environment_t environ_cb)
 
 void handle_error( const char* error )
 {
-	char str [256];
 	if(error)
-   {
-		sprintf( str, "Error: %s", error );
-		log_cb(RETRO_LOG_ERROR, str );
-	}
+		log_cb(RETRO_LOG_ERROR, "Error: %s\n", error);
 }
 
 void handle_info( const char* info )
 {
-	char str [256];
 	if(info)
-   {
-		sprintf( str, "Info: %s\n", info );
-		log_cb(RETRO_LOG_INFO, str );
-	}
+		log_cb(RETRO_LOG_INFO, "Info: %s\n", info );
 }

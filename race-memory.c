@@ -14,11 +14,6 @@
  * TODO:
  */
 
-#include <stdio.h>
-#if 0
-#include <streams/file_stream.h>
-#endif
-
 #include "race-memory.h"
 #include "types.h"
 #include "input.h"		/* for Gameboy Input */
@@ -452,7 +447,6 @@ void mem_init(void)
 		{
             //this branch doesn't seem to work for some games (Puzzle Bobble)
  		    realBIOSloaded = 1;
- 		    printf("BIOS file loaded.  This path is fairly untested!\n");
 
             cpurom[0x3202]=0xf4;//from Koyote
             cpurom[0x3203]=0x6b;//from Koyote
