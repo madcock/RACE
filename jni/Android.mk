@@ -9,7 +9,7 @@ CORE_DIR := $(LOCAL_PATH)/..
 include $(CORE_DIR)/Makefile.common
 
 COREFLAGS := $(INCFLAGS) $(FLAGS) -DWANT_CRC32
-COREFLAGS += -D__LIBRETRO__ -D_MAX_PATH=2048 -DHOST_FPS=60 
+COREFLAGS += -D__LIBRETRO__ -D_MAX_PATH=2048
 
 GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")

@@ -237,10 +237,6 @@ static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
    {
       switch(addr)
       {
-#if 0
-         case 0x80:	/* CPU speed */
-            break;
-#endif
          case 0xA0:	/* L CH Sound Source Control Register */
             if (cpuram[0xB8] == 0x55 && cpuram[0xB9] == 0xAA)
                Write_SoundChipNoise(data);/*Flavor SN76496Write(0, data); */
@@ -254,17 +250,7 @@ static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
             if (cpuram[0xB8] == 0xAA)
                dac_writeL(data); /*Flavor DAC_data_w(0,data); */
             break;
-#if 0
-         case 0xA3:	/* R CH DAC Control Register */ /* Flavor hack for mono only sound */
-            ngpSoundExecute();
-            if (cpuram[0xB8] == 0xAA)
-               dac_writeR(data); /* Flavor DAC_data_w(1,data); */
-            break;
-#endif
          case 0xB8:	/* Z80 Reset */
-#if 0
-            if (data == 0x55)	DAC_data_w(0,0);
-#endif
          case 0xB9:	/* Sourd Source Reset Control Register */
             switch(data)
             {
@@ -293,15 +279,6 @@ static INLINE void tlcsMemWriteB(unsigned int addr, unsigned char data)
    {
       if (addr == 0x87E2 && mainram[0x47F0] != 0xAA)
          return;		/* disallow writes to GEMODE */
-
-#if 0
-      if((addr >= 0x8800 && addr <= 0x88FF)
-            || (addr >= 0x8C00 && addr <= 0x8FFF)
-            || (addr >= 0xA000 && addr <= 0xBFFF)
-            || addr == 0x00008020
-            || addr == 0x00008021)
-         spritesDirty = true;
-#endif
 
       mainram[addr-0x00004000] = data;
       return;

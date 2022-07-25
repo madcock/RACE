@@ -49,7 +49,7 @@ ifneq ($(STATIC_LINKING), 1)
 		$(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c
 endif
 
-FLAGS += -D__LIBRETRO__ -D_MAX_PATH=2048 -DHOST_FPS=60 
+FLAGS += -D__LIBRETRO__ -D_MAX_PATH=2048
 ifeq (,$(findstring msvc,$(platform)))
 CXXFLAGS += -fpermissive
 endif

@@ -57,12 +57,7 @@ void ngpSoundExecute(void)
 #if defined(DRZ80) || defined(CZ80)
    int toRun = sndCycles/2;
    if(ngpRunning)
-   {
       Z80_Execute(toRun);
-   }
-#if 0
-   timer_add_cycles(toRun);
-#endif
    sndCycles -= toRun;
 #else
    int		elapsed;
@@ -70,9 +65,6 @@ void ngpSoundExecute(void)
    {
       elapsed = z80Step();
       sndCycles-= (2*elapsed);
-#if 0
-      timer_add_cycles(elapsed);
-#endif
    }
 #endif
 }

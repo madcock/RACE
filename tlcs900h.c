@@ -362,13 +362,6 @@ static INLINE void tlcsMemWriteWaddrB(unsigned int addr, unsigned short data)
 
 
 #define mem_writeW tlcsMemWriteW
-#if 0
-static INLINE void mem_writeW(unsigned int addr, unsigned short data)
-{
-   // if (addr > 0x200000) memoryCycles+= 2;
-   tlcsMemWriteW(addr, data);
-}
-#endif
 
 // write a long word (data) to a memory address (addr)
 static INLINE void tlcsMemWriteL(unsigned int addr, unsigned int data)
@@ -399,13 +392,6 @@ static INLINE void tlcsMemWriteL(unsigned int addr, unsigned int data)
 }
 
 #define mem_writeL tlcsMemWriteL
-#if 0
-static INLINE void mem_writeL(unsigned int addr, unsigned int data)
-{
-   // if (addr > 0x200000) memoryCycles+= 4;
-   tlcsMemWriteL(addr, data);
-}
-#endif
 
 
 static INLINE unsigned char readbyte(void)
@@ -979,29 +965,12 @@ static INLINE unsigned char srGE(void)
              || ((gen_regsSR & (SF|VF)) == VF)) ? 0 : 1);
 }
 
-#if 0
-unsigned char srGE(void)
-{
-   return ((((gen_regsSR & (SF|VF)) == (VF|SF))
-            || ((gen_regsSR & (SF|VF)) == 0)) ? 1 : 0);
-}
-#endif
-
 static INLINE unsigned char srGT(void)
 {
     return (((((gen_regsSR & (SF|VF)) == SF)
               || ((gen_regsSR & (SF|VF)) == VF))
              || (gen_regsSR & ZF)) ? 0 : 1);
 }
-
-#if 0
-unsigned char srGT(void)
-{
-   return (((((gen_regsSR & (SF|VF)) == (VF|SF))
-               || ((gen_regsSR & (SF|VF)) == 0))
-            && (gen_regsSR & ZF)) ? 1 : 0);
-}
-#endif
 
 static INLINE unsigned char srUGT(void)
 {
@@ -1538,52 +1507,6 @@ int ldiw(void)  // LDIW (XDE+),(XHL+) 10010011 00010000
 int ldir(void)  // LDIR (XDE+),(XHL+) 10000011 00010001
 // LDIR (XIX+),(XIY+) 10000101 00010001
 {
-#if 0  //causes problems when starting new game in CFC1
-	unsigned char *dst,*src;
-	int cnt=*cregsW[1];
-
-	if(cnt==0)
-        cnt=0x10000;
-
-    if (opcode&2)
-	{
-		dst=get_address(*cregsL[2]);
-		src=get_address(*cregsL[3]);
-		*cregsL[2]+=cnt;
-		*cregsL[3]+=cnt;
-	    //dbg_print("ldir: 1-called with cnt=0x%04X dst=0x%06X src=0x%06X\n", cnt, *cregsL[2], *cregsL[3]);
-	}
-	else
-	{
-		dst=get_address(gen_regsXIX);
-		src=get_address(gen_regsXIY);
-		gen_regsXIX+=cnt;
-		gen_regsXIY+=cnt;
-	    //dbg_print("ldir: 2-called with cnt=0x%04X dst=0x%06X src=0x%06X\n", cnt, gen_regsXIX, gen_regsXIY);
-	}
-
-	if(dst && src)
-	{
-		//delta warp tries to read from 0x0FA000 (get_address returns NULL)
-        /*MOTM produces
-        ldir: 1-called with cnt=0x2BFF dst=0x006C00 src=0x006BFF
-        ldir: 1-called with cnt=0x0008 dst=0x0067DC src=0x0067E4
-        so, memcpy won't work
-        */
-		do
-		{
-            *dst++=*src++;
-		}while(--*cregsW[1]);
-	}
-	else
-	{
-		if(dst)
-			memset(dst, 0xFF, cnt);
-	}
-
-    gen_regsSR = gen_regsSR & ~(HF|VF|NF);
-    return 14*cnt+10;
-#else
     if (opcode&2)
     {
         // XDE/XHL
@@ -1607,56 +1530,11 @@ int ldir(void)  // LDIR (XDE+),(XHL+) 10000011 00010001
     {
         return 10;
     }
-#endif
 }
 
 int ldirw(void) // LDIRW (XDE+),(XHL+) 10010011 00010001
 // LDIRW (XIX+),(XIY+) 10010101 00010001
 {
-#if 0  //causes problems when starting new game in CFC1
-	unsigned char *dst,*src;
-	int cnt=*cregsW[1];
-
-	if(cnt==0)
-        cnt=0x10000;
-
-    if (opcode&2)
-	{
-		dst=(unsigned char *)get_address(*cregsL[2]);
-		src=(unsigned char *)get_address(*cregsL[3]);
-		*cregsL[2]+= 2*cnt;
-		*cregsL[3]+= 2*cnt;
-	    //dbg_print("ldirw: 1-called with cnt=0x%04X dst=0x%06X src=0x%06X\n", cnt, *cregsL[2], *cregsL[3]);
-	}
-	else
-	{
-		/*if(gen_regsXIY == 0xFA000)  //Delta Warp stupidly does this
-			src=get_address(gen_regsXIY+0x200000);*/
-		src=(unsigned char *)get_address(gen_regsXIY);
-		dst=(unsigned char *)get_address(gen_regsXIX);
-		gen_regsXIX+=2*cnt;
-		gen_regsXIY+=2*cnt;
-	    //dbg_print("ldirw: 2-called with cnt=0x%04X dst=0x%06X src=0x%06X\n", cnt, gen_regsXIX, gen_regsXIY);
-	}
-
-	if(dst && src)
-	{
-		//memmove(dst, src, cnt*2);  //delta warp tries to read from 0x0FA000 (get_address returns NULL)
-		do
-		{
-            *dst++=*src++;
-            *dst++=*src++;
-		}while(--*cregsW[1]);
-	}
-	else
-	{
-		if(dst)
-			memset(dst, 0xFF, cnt*2);
-	}
-
-    gen_regsSR = gen_regsSR & ~(HF|VF|NF);
-    return 14*cnt+10;
-#else
     if (opcode&2)
     { // XDE/XHL
         mem_writeW(*cregsL[2],mem_readW(*cregsL[3]));
@@ -1687,7 +1565,6 @@ int ldirw(void) // LDIRW (XDE+),(XHL+) 10010011 00010001
         return 10;
         //  return 10+4;
     }
-#endif
 }
 
 int ldd(void)  // LDD (XDE-),(XHL-) 10000011 00010010
@@ -8384,9 +8261,6 @@ static int tlcs_step(void)
 
     opcode = readbyte();
 
-    //printf("tlcs_step: PC=0x%X opcode=0x%X\n", gen_regsPC-1, opcode);
-
-
     clocks+= instr_table[opcode]();
 
     clocks+= memoryCycles;
@@ -8398,7 +8272,6 @@ static int tlcs_step(void)
 }
 
 
-//extern unsigned char *ngpScX;
 extern unsigned char *ngpScY;
 int ngOverflow = 0;
 
@@ -8418,12 +8291,8 @@ void tlcs_execute(int cycles)
     while(cycles > 0)
     {
         /* AKTODO */
-#if 0
-        if(options[TURBO_OPTION])
-#else
         /* TODO/FIXME - perhaps this is too fast as a default? */
         if (1)
-#endif
         {
             //call a bunch of steps
             for (elapsed = tlcs_step();elapsed<(515>>(tlcsClockMulti-1)); elapsed += tlcs_step());
@@ -8438,9 +8307,6 @@ void tlcs_execute(int cycles)
         soundStep(elapsed);
 
         hCounter-= elapsed;
-#if 0
-        *ngpScX = hCounter>>2;
-#endif
 
         if (hCounter < 0)
         {
@@ -8471,11 +8337,7 @@ void tlcs_execute(int cycles)
                     tlcs_interrupt(2);
 #ifdef FRAMESKIP
                 if(frame == 0)
-                {
                     frame = skipFrames;
-                    //SDL_Rect numRect = drawNumber(skipFrames, 10, 24);
-                    //SDL_UpdateRect(screen, numRect.x, numRect.y, numRect.w, numRect.h);
-                }
                 else
                     frame--;
 #endif
@@ -8486,11 +8348,7 @@ void tlcs_execute(int cycles)
     }
     ngOverflow = hCounter + cycles;
 
-    //graphics_paint();  //paint the screen, if it's dirty
-
     //MHE used to sound update here!?!?
-
-    return;
 }
 
 
@@ -8504,9 +8362,9 @@ void ngpc_run(void)
     while(m_bIsActive)  //should be some way to exit
     {
 #ifdef FRAMESKIP
-        tlcs_execute((6*1024*1024) / HOST_FPS, skipFrames);
+        tlcs_execute((6*1024*1024) / 60, skipFrames);
 #else
-        tlcs_execute((6*1024*1024) / HOST_FPS);
+        tlcs_execute((6*1024*1024) / 60);
 #endif
 
     }

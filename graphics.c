@@ -105,12 +105,6 @@ unsigned short p2[16] = {
 /* extra fudge factor for PSP? */
 #define SCREEN_OFFET (SCREEN_X_OFFSET + (SCREEN_Y_OFFSET*(screen->w+PSP_FUDGE)))
 
-/* Flavor - For speed testing, you can turn off screen updates */
-
-#if 0
-#define NO_SCREEN_OUTPUT  /* seems to give about 4-6FPS on GP2X */
-#endif
-
 /*
  *
  * Palette Initialization
@@ -234,10 +228,6 @@ static void darken_rgb(float *r, float *g, float *b)
 
 void palette_init16(DWORD dwRBitMask, DWORD dwGBitMask, DWORD dwBBitMask)
 {
-#if 0
-    dbg_print("in palette_init16(0x%X, 0x%X, 0x%X)\n", dwRBitMask, dwGBitMask, dwBBitMask);
-#endif
-
     char RShiftCount = 0, GShiftCount = 0, BShiftCount = 0;
     char RBitCount = 0, GBitCount = 0, BBitCount = 0;
     int  r,g,b;
@@ -395,10 +385,6 @@ void pngpalette_init(void)
  *
  */
 
-#if 0
-static const bwTable[8] = { 0x0000, 0x0333, 0x0555, 0x0777, 0x0999, 0x0BBB, 0x0DDD, 0x0FFF };
-#endif
-
 /* NOTA Color para juegos b/n */
 static const unsigned short bwTable[8] =
     {
@@ -426,10 +412,6 @@ typedef struct
 }
 SPRITEDEFS;
 
-#if 0
-unsigned int spritesDirty = true;
-#endif
-
 SPRITEDEFS spriteDefs[3];    /* 4 priority levels */
 
 /* definitions of types and variables that are used internally during
@@ -456,12 +438,6 @@ unsigned short palettes[16*4+16*4+16*4]; /* placeholder for the converted palett
 TILECACHE  tCBack;      /* tile pointer cache for the back buffer */
 TILECACHE  tCFront;     /* tile pointer cache for the front buffer */
 
-#if 0
-int    BGCol;      /* placeholder for the background color this VSYNC */
-int    OOWCol;      /* placeholder for the outside window color this VSYNC */
-unsigned char SprPriLo, SprPriHi, SprPri = 0;
-#endif
-
 static INLINE void set_paletteCol(
       unsigned short *palette_table,
       unsigned short *sprite,
@@ -475,30 +451,15 @@ static INLINE void set_paletteCol(
     */
 
    for(i=0;i<16*4;i++)
-   {
-#if 0
-      sprite[i] = *palette_table & 0x0FFF;
-#endif
       sprite[i] = NGPC_TO_SDL16(palette_table[i]);
-   }
 
    /* initialize front plane palette table */
    for(i=0;i<16*4;i++)
-   {
-#if 0
-      front[i] = *palette_table & 0x0FFF;
-#endif
       front[i] = NGPC_TO_SDL16(palette_table[i+16*4]);
-   }
 
    /* initialize sprite palette table (?) */
    for(i=0;i<16*4;i++)
-   {
-#if 0
-      back[i] = *palette_table & 0x0FFF;
-#endif
       back[i] = NGPC_TO_SDL16(palette_table[i+16*4*2]);
-   }
 }
 
 static INLINE void set_paletteBW(
@@ -677,75 +638,6 @@ static INLINE void lineSprite(SPRITEDEFS *sprDefs)
 }
 
 /* sort all the sprites according to their priorities */
-#if 0
-static void spriteSort(unsigned int bw)
-{
-   unsigned short spriteCode;
-   unsigned short *pt;
-   unsigned char x, y, prevx=0, prevy=0;
-   int    i, j;
-
-   SPRITEDEFS *SprPri00 = &spriteDefs[0];
-   SPRITEDEFS *SprPri40 = &spriteDefs[1];
-   SPRITEDEFS *SprPri80 = &spriteDefs[2];
-   SPRITEDEFS *SprPriC0 = &spriteDefs[3];
-
-   /* initialize the number of sprites in each structure */
-   SprPri00->count = 0;
-   SprPri40->count = 0;
-   SprPri80->count = 0;
-   SprPriC0->count = 0;
-   for (i=0;i<64;i++)
-   {
-      spriteCode = *((unsigned short *)(sprite_table+4*i));
-      if (spriteCode & 0x0400)
-         prevx+= *(sprite_table+4*i+2);
-      else
-         prevx = *(sprite_table+4*i+2) + 8;
-      x = prevx + *scrollSpriteX;
-      if (spriteCode & 0x0200)
-         prevy+= *(sprite_table+4*i+3);
-      else
-         prevy = *(sprite_table+4*i+3) + 8;
-      y = prevy + *scrollSpriteY;
-      j = *scanlineY+8 - y;
-      if ((spriteCode>0xff) && (j >= 0) && (j < 8) && (x<168))  /* is this sprite visable on the current scanline? */
-      {
-         //  if ((j >= 0) && (j < 8) && (x<168)) {
-         SPRITE *spr = NULL;
-         // *(sprite_palette_numbers+i)
-         pt = (unsigned short *)(pattern_table + 16*(spriteCode & 0x01ff)
-               + ((spriteCode&0x4000) ? (7-j)*2 : j*2));
-         switch (spriteCode & 0x1800)
-         {
-            // case order reversed because priority 3 (and 2) sprites occur most of the time
-            case 0x1800:
-               spr = &SprPriC0->sprite[SprPriC0->count];
-               SprPriC0->count++;
-               break;
-            case 0x1000:
-               spr = &SprPri80->sprite[SprPri80->count];
-               SprPri80->count++;
-               break;
-            case 0x0800:
-               spr = &SprPri40->sprite[SprPri40->count];
-               SprPri40->count++;
-               break;
-            case 0x0000:
-               spr = &SprPri00->sprite[SprPri00->count];
-               SprPri00->count++;
-               break;
-         }
-         spr->pattern = spriteCode;
-         spr->offset = x;
-         spr->tilept = pt;
-         spr->palette = ((bw) ? &palettes[(spriteCode>>11)&0x04]
-               : &palettes[(*(sprite_palette_numbers+i)&0x0F)*4]);
-      }
-      }
-   }
-#endif
-
 static INLINE void spriteSortAll(unsigned int bw)
 {
     unsigned int spriteCode;
@@ -789,10 +681,6 @@ static INLINE void spriteSortAll(unsigned int bw)
             if(scanline < 0 || scanline >= 152)
                 continue;
 
-#if 0
-            if ((x<168) && (spriteCode>0xff) && (spriteCode & 0x1800))
-            {
-#endif
                 switch (spriteCode & 0x1800)
                 {
                     /* case order reversed because priority 3 (and 2) sprites occur most of the time */
@@ -813,9 +701,6 @@ static INLINE void spriteSortAll(unsigned int bw)
                                         + ((spriteCode&0x4000) ? (7-j)*2 : j*2));
                 spr->palette = ((bw) ? &palettes[(spriteCode>>11)&0x04]
                                 : &palettes[(*(sprite_palette_numbers+i)&0x0F)*4]);
-#if 0
-            }
-#endif
         }
     }
 }
@@ -838,25 +723,15 @@ static void graphicsBlitInit(void)
     tCFront.tileBase = tile_table_front;
     tCFront.palette  = &palettes[16*4];
     /* definitions for sprite priorities */
-#if 0
-    SprPriLo = *frame1Pri>>6;
-    SprPriHi = *frame0Pri>>6; /* ? */
-#endif
     spriteDefs[0].gbp = &drawBuffer[8*SIZEX];
     spriteDefs[1].gbp = &drawBuffer[8*SIZEX];
     spriteDefs[2].gbp = &drawBuffer[8*SIZEX];
-#if 0
-    spriteDefs[3].gbp = &drawBuffer[8*SIZEX];
-#endif
     /* force recalculations for first line */
     tCBack.oldScrollX = *tCBack.newScrollX;
     tCBack.oldScrollY = *tCBack.newScrollY+1;   /* force calculation of structure data */
     tCFront.oldScrollX = *tCFront.newScrollX;
     tCFront.oldScrollY = *tCFront.newScrollY+1;  /* force calculation of structure data */
     /* start drawing at line 0 */
-#if 0
-     *scanlineY = 0;
-#endif
 }
 
 static INLINE void RenderTileCache(TILECACHE *tC, unsigned int bw)
@@ -1371,18 +1246,12 @@ BOOL graphics_init(void)
         case NGP:
             bgTable  = (unsigned short *)bwTable;
             oowTable = (unsigned short *)bwTable;
-#if 0
-            set_palette = set_paletteBW;
-#endif
             graphicsBlitInit();
             *scanlineY = 0;
             break;
         case NGPC:
 			bgTable  = (unsigned short *)get_address(0x000083E0);
 			oowTable  = (unsigned short *)get_address(0x000083F0);
-#if 0
-         set_palette = set_paletteCol;
-#endif
          graphicsBlitInit();
          *scanlineY = 0;
          break;

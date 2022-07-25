@@ -40,9 +40,6 @@ unsigned char deviceID = 0x2F;
 unsigned char cartSize = 32;
 unsigned int bootBlockStartAddr = 0x1F0000;
 unsigned char bootBlockStartNum = 31;
-#if 0
-unsigned int cartAddrMask = 0x3FFFFF;
-#endif
 
 /* with selector, I get
 * writeSaveGameFile: Couldn't open Battery//mnt/sd/Games/race/ChryMast.ngf file
@@ -85,42 +82,27 @@ void setupFlashParams(void)
          deviceID = 0x2F;  /* the upper chip will always be 16bit */
          bootBlockStartAddr = 0x1F0000;
          bootBlockStartNum = 31;
-#if 0
-         cartAddrMask=0x3FFFFF;
-#endif
          break;
       case 16:
          deviceID = 0x2F;
          bootBlockStartAddr = 0x1F0000;
          bootBlockStartNum = 31;
-#if 0
-         cartAddrMask=0x1FFFFF;
-#endif
          break;
       case 8:
          deviceID = 0x2C;
          bootBlockStartAddr = 0xF0000;
          bootBlockStartNum = 15;
-#if 0
-         cartAddrMask=0x0FFFFF;
-#endif
          break;
       case 4:
          deviceID = 0xAB;
          bootBlockStartAddr = 0x70000;
          bootBlockStartNum = 7;
-#if 0
-         cartAddrMask=0x07FFFF;
-#endif
          break;
       case 0:
          manufID = 0x00;
          deviceID = 0x00;
          bootBlockStartAddr = 0x00000;
          bootBlockStartNum = 0;
-#if 0
-         cartAddrMask=0;
-#endif
          break;
    }
 }
@@ -332,9 +314,6 @@ void writeSaveGameFile(void)
    needToWriteFile = 0;
 #ifdef TARGET_GP2X
    sync();
-#if 0
-   system("sync");
-#endif
 #endif
 }
 
@@ -436,10 +415,6 @@ void loadSaveGameFile(void)
 
 void flashWriteByte(unsigned int addr, unsigned char data, unsigned char operation)
 {
-#if 0
-   addr &= cartAddrMask;  /* the stuff gets mirrored to the higher slots. */
-#endif
-
    if(blockNumFromAddr(addr) == 0)  /* hack because DWARP writes to bank 0 */
       return;
 
@@ -638,9 +613,6 @@ void vectFlashWrite(unsigned char chip, unsigned int to, unsigned char *fromAddr
    if(chip)
       to+=0x200000;
 
-#if 0
-   memcpy(dest,fromAddr,numBytes);
-#endif
    while(numBytes--)
    {
       flashWriteByte(to, *fromAddr, FLASH_WRITE);
@@ -651,21 +623,10 @@ void vectFlashWrite(unsigned char chip, unsigned int to, unsigned char *fromAddr
 
 void vectFlashErase(unsigned char chip, unsigned char blockNum)
 {
-#if 0
-   unsigned char totalBlocks = bootBlockStartNum+4;
-
-   if(blockNum >= totalBlocks)
-      blockNum = totalBlocks-1;
-#endif
-
    /* this needs to be modified to take into account boot block areas (less than 64k) */
    unsigned int blockAddr = blockNumToAddr(chip, blockNum);
    unsigned int numBytes = blockSize(blockNum);
 
-#if 0
-   /* memset block to 0xFF */
-   memset(&mainrom[blockAddr], 0xFF, numBytes);
-#endif
    while(numBytes--)
    {
       flashWriteByte(blockAddr, 0xFF, FLASH_ERASE);

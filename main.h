@@ -27,9 +27,6 @@
 
 #define NR_OF_SYSTEMS	2
 
-/* to call these FPS is a bit of a misnomer */
-#define HOST_FPS 60  /* the number of frames we want to draw to the host's screen every second */
-
 #ifdef __cplusplus
 extern "C" {
 #endif

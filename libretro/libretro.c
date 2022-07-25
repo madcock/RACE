@@ -418,10 +418,10 @@ void retro_run(void)
       update_audio_latency = false;
    }
 
-   tlcs_execute(CPU_FREQ / HOST_FPS, skipFrame);
+   tlcs_execute(CPU_FREQ / 60, skipFrame);
 
    /* Get the number of samples in a frame */
-   samplesPerFrame = RETRO_SAMPLE_RATE / HOST_FPS;
+   samplesPerFrame = RETRO_SAMPLE_RATE / 60;
 
    memset(sampleBuffer, 0, samplesPerFrame * sizeof(int16_t));
 
