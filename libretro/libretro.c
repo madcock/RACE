@@ -102,7 +102,11 @@ static void init_frameskip(void)
 }
 
 /* core options */
+#if !defined(SF2000)
 static int RETRO_SAMPLE_RATE = 44100;
+#else
+static int RETRO_SAMPLE_RATE = 11025;
+#endif
 
 struct ngp_screen* screen;
 int setting_ngp_language; /* 0x6F87 - language */

@@ -418,7 +418,11 @@ void sound_init(int SampleRate)
 void system_sound_chipreset(void)
 {
    /* Initialises sound chips, matching frequencies */
-   sound_init(44100);
+#if !defined(SF2000)
+	sound_init(44100);
+#else
+	sound_init(11025);
+#endif
 }
 
 int sound_system_init(void)
